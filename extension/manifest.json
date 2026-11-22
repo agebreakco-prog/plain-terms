@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Plain Terms",
+  "version": "1.0.0",
+  "description": "Rewrites terms of service, privacy policies and cookie banners into plain language. On-device Gemini Nano first, cloud fallback.",
+  "minimum_chrome_version": "139",
+  "action": {
+    "default_title": "Explain in plain terms",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "sidePanel",
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ]
+}

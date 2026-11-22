@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Plain Terms side panel preview</title>
+<link rel="stylesheet" href="/ext/styles.css"></head>
+<body><main id="app" class="pt-app"></main>
+<script>
+// Minimal chrome.* shim so the real side-panel bundle runs outside an extension.
+// executeScript runs the real extractor function inside the neighbouring site frame.
+window.__PT_PREVIEW__ = true;
+const mem = {};
+const site = () => parent.document.getElementById('site').contentWindow;
+window.chrome = {
+  storage: {
+    local: { get: async (k) => ({ [k]: mem[k] }), set: async (o) => Object.assign(mem, o) },
+    session: { get: async () => ({}), remove: async () => {}, onChanged: { addListener() {} } },
+  },
+  tabs: { query: async () => [{ id: 1, url: 'https://brightloop.example/' }] },
+  scripting: { executeScript: async ({ func }) => [{ result: site().eval('(' + func.toString() + ')()') }] },
+  permissions: { request: async () => true },
+};
+addEventListener('load', () => setTimeout(() => {
+  document.querySelector('[data-src="cookie"]').click();
+  document.querySelector('[data-ref="go"]').click();
+}, 300));
+</script>
+<script type="module" src="/ext/sidepanel.js"></script>
+</body></html>

@@ -1,0 +1,9 @@
+{
+  "parameters": {
+    "on_device_max_chars": { "defaultValue": { "value": "12000" }, "description": "Documents longer than this skip Gemini Nano and go to the cloud (or are chunked in on-device-only mode).", "valueType": "NUMBER" },
+    "chunk_chars": { "defaultValue": { "value": "9000" }, "description": "Chunk size for on-device map-reduce of long documents.", "valueType": "NUMBER" },
+    "max_chunks": { "defaultValue": { "value": "8" }, "description": "Maximum chunks read on-device per document.", "valueType": "NUMBER" },
+    "cloud_max_chars": { "defaultValue": { "value": "120000" }, "description": "Cloud input cap to stay inside free-tier quotas.", "valueType": "NUMBER" },
+    "cloud_model": { "defaultValue": { "value": "gemini-3.5-flash-lite" }, "description": "Cloud fallback model used by Firebase AI Logic.", "valueType": "STRING" }
+  }
+}

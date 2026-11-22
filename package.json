@@ -1,0 +1,25 @@
+{
+  "name": "plain-terms",
+  "version": "1.0.0",
+  "description": "Hybrid on-device + cloud AI that rewrites terms of service, privacy policies and cookie banners into plain language. Built on Firebase AI Logic hybrid inference.",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.js",
+    "screenshots": "node scripts/screenshots.mjs",
+    "zip": "node scripts/build.mjs && python3 -m zipfile -c dist/plain-terms-extension.zip dist/extension/"
+  },
+  "dependencies": {
+    "firebase": "13.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "firebase-tools": "^14.27.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/"
+  }
+}

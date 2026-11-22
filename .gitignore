@@ -1,0 +1,6 @@
+node_modules/
+dist/
+firebase.config.json
+.firebaserc
+*.log
+.env
