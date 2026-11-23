@@ -87,6 +87,7 @@ try {
       ['05-no-nano-fallback.png', '?mock=auto&nano=unavailable&sample=terms&run=1&theme=dark', 520, 1500],
       ['06-desktop-web.png', '?mock=auto&nano=available&sample=terms&run=1', 1280, 1400],
       ['07-demo-rules-only.png', '?demo=1&sample=cookie&run=1&settings=1', 520, 1150],
+      ['08-ask-long-policy-on-device.png', `?mock=auto&nano=available&sample=privacy&run=1&focus=ask&ask=${encodeURIComponent('Do they sell or share my data?')}`, 520, 1150],
     ];
     for (const [name, q, w, h] of shots) {
       copyFileSync(await shot(q.startsWith('/') ? `${origin}${q}` : `${origin}/${q}`, name, w, h), join(root, 'docs', name));
