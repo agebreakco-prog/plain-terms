@@ -12,56 +12,67 @@ export const CATEGORIES = {
     label: 'Sells or shares your data',
     severity: 'high',
     why: 'Your personal information can be sold or handed to advertisers or other companies.',
+    tip: "Look for a 'Do not sell or share my personal information' link or opt-out, and turn off ad personalisation in your account settings.",
   },
   auto_renew: {
     label: 'Auto-renewal',
     severity: 'high',
     why: 'You will keep being charged until you actively cancel.',
+    tip: "Put a reminder in your calendar a few days before the renewal date, and check how to cancel before you pay.",
   },
   arbitration: {
     label: 'Forced arbitration',
     severity: 'high',
     why: 'You give up the right to sue in court or join a class action. Disputes go to a private arbitrator.',
+    tip: "Check for an arbitration opt-out (often 30 days after sign-up, by email or letter) and use it if you may ever need to sue.",
   },
   content_license: {
     label: 'Broad licence to your content',
     severity: 'medium',
     why: 'The company can reuse what you upload, often forever and without paying you.',
+    tip: "Don't upload anything you'd mind them reusing, such as personal photos or work you want to sell.",
   },
   unilateral_changes: {
     label: 'Can change terms any time',
     severity: 'medium',
     why: 'The rules can change without you agreeing again. Continuing to use the service counts as accepting.',
+    tip: "Keep a copy of the version you agreed to, and skim the change emails they send.",
   },
   tracking: {
     label: 'Tracking and ad cookies',
     severity: 'medium',
     why: 'Your activity may be tracked across sites or devices for advertising.',
+    tip: "Choose 'Reject non-essential' or turn off ad partners in Manage preferences. It only takes a click.",
   },
   sensitive_data: {
     label: 'Sensitive data collected',
     severity: 'high',
     why: 'Collects especially sensitive data such as precise location, biometrics, health data or contacts.',
+    tip: "Deny optional permissions (precise location, contacts, health data) in your phone or browser settings.",
   },
   data_retention: {
     label: 'Keeps data after you leave',
     severity: 'medium',
     why: 'Your data may be kept for a long time, even after you delete your account.',
+    tip: "Ask for deletion before you close your account. In the EU and UK you can make a data-erasure request.",
   },
   termination: {
     label: 'Can cut you off any time',
     severity: 'low',
     why: 'Your account can be suspended or closed at the company’s discretion.',
+    tip: "Keep your own copies of anything important you store with them.",
   },
   fees: {
     label: 'Fees or no refunds',
     severity: 'medium',
     why: 'Payments may be non-refundable or come with cancellation fees.',
+    tip: "Check the cancellation and refund rules before you pay. Prefer monthly plans when you're unsure.",
   },
   liability: {
     label: 'Limits their liability',
     severity: 'low',
     why: 'If something goes wrong, the company limits what it owes you.',
+    tip: "Don't rely on this service as your only copy of anything that matters.",
   },
 };
 
