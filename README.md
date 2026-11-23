@@ -14,6 +14,9 @@ Almost nobody reads the fine print. It is long and written to be skimmed past, a
 
 - **Three sources in the extension side panel:** the whole page, the visible cookie banner (found automatically), or the current selection. You can also right-click selected text and choose **Explain "…" in plain terms**.
 - **A plain-language result:** a one-line TL;DR, up to six plain bullet points, a concern score from 0 to 100, and risk cards that quote the exact clause.
+- **Ask the fine print:** after an explanation, ask a question in everyday words ("Can I cancel any time?", "Do they sell my data?"). A local retriever picks the few most relevant passages (about 1–3k characters), so **even a 40-page policy can be questioned privately by Gemini Nano on the device**. The answer comes with a yes/no/depends verdict and a verified quote.
+- **What you can do:** every risk card ends with one practical step (opt-out links, arbitration opt-out windows, calendar reminders before renewals, cookie "Reject non-essential").
+- **Copy summary:** one click copies a plain-text summary with quotes and tips, ready to paste into a chat or a note.
 - **Grounded quotes:** every clause the AI flags is checked against the source text. Findings whose quote isn't in the document are dropped and counted in the notes.
 - **Transparent routing:** each result shows where it ran (on-device, cloud, rules) and why, in one sentence.
 - **Privacy control:** choose *On-device only*, *Balanced* (the default) or *Cloud first*.
@@ -31,6 +34,7 @@ The routing policy lives in [`src/core/router.js`](src/core/router.js), which is
 | Any length, Cloud first | `PREFER_IN_CLOUD` | Cloud quality first. The SDK falls back to Nano on network errors. |
 | *On-device only* selected, or offline | `ONLY_ON_DEVICE` | A single call, or map-reduce over chunks for long texts. Nothing is sent to the cloud. If Nano is missing, rules only. |
 | No Firebase config / demo mode | none | Rules only, labelled "Demo mode". |
+| **Ask the fine print** (any document length), Balanced | `PREFER_ON_DEVICE` | Retrieval first: only the most relevant passages (≤ 3.5k chars) go into the prompt, so the question fits Nano's window even when the document doesn't. Falls back to the cloud when Nano is missing, and to showing the matching passages when no model is reachable. |
 
 After each call, the engine reads `response.inferenceSource` from Firebase AI Logic and **reports where inference actually ran**, not where we hoped it would. For example, the UI says "Gemini Nano isn't ready on this device, so Firebase AI Logic fell back to the cloud" when `PREFER_ON_DEVICE` ended up in the cloud.
 
@@ -56,9 +60,10 @@ src/
     merge.js          tolerant JSON parsing, quote grounding, merging
     segment.js        normalisation, sentence split, chunking
     prompts.js        prompt + shared JSON schema
+    ask.js            "Ask the fine print": passage retrieval + grounded Q&A
     mock-model.js     simulated model for offline demos/screenshots/tests
 samples/              original fictional documents (cookie banner, ToS, long policy)
-test/                 node:test suites (30 tests)
+test/                 node:test suites (41 tests)
 scripts/              build (esbuild), screenshots + icons (headless Chrome)
 ```
 
@@ -116,6 +121,7 @@ npx firebase-tools deploy --only hosting,remoteconfig
 | `?mock=auto&nano=available` | runs the full hybrid pipeline with a **simulated** model. Results are labelled "simulated". Used for the screenshots in `docs/`. |
 | `?sample=terms&run=1` | preloads a sample and runs it |
 | `?privacy=private` | starts in On-device only mode |
+| `?ask=Can%20I%20cancel%3F` | asks a question once the result is shown |
 | `?theme=dark` | forces dark theme |
 
 ## Screenshots
@@ -126,6 +132,7 @@ The images in `docs/` were rendered with headless Chrome (`npm run screenshots`)
 |---|---|
 | ![](docs/01-terms-on-device.png) | ![](docs/03-long-policy-cloud.png) |
 | ![](docs/04-private-mode-chunked.png) | ![](docs/05-no-nano-fallback.png) |
+| ![](docs/08-ask-long-policy-on-device.png) | ![](docs/02-cookie-banner.png) |
 
 ## Limitations
 
