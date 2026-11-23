@@ -52,5 +52,17 @@ mountApp(root, {
   const privacy = params.get('privacy');
   if (privacy) root.querySelector(`input[name="pt-privacy"][value="${privacy}"]`)?.click();
   if (params.get('run') === '1') root.querySelector('[data-ref="go"]').click();
+  // ?ask=Can%20I%20cancel%3F asks a question once the result is shown (demo/screenshots).
+  const question = params.get('ask');
+  if (params.get('focus') === 'ask') root.classList.add('pt-focus-ask');
+  if (question) {
+    const timer = setInterval(() => {
+      const form = root.querySelector('.pt-ask-form');
+      if (!form) return;
+      clearInterval(timer);
+      form.querySelector('input').value = question;
+      form.requestSubmit();
+    }, 100);
+  }
   if (params.get('settings') === '1') root.querySelector('details.pt-settings').open = true;
 });
