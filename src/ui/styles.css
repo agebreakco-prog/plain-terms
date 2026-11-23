@@ -137,3 +137,27 @@ code { font-size: 12px; }
 @media (max-width: 420px) { .pt-app { padding: 12px; } .pt-summary { grid-template-columns: 52px 1fr; } .pt-score { width: 52px; height: 52px; } .pt-score span { width: 40px; height: 40px; font-size: 15px; } }
 .pt-foot { max-width: 720px; margin: 0 auto; padding: 0 16px 24px; color: var(--muted); font-size: 12px; }
 .pt-foot a { color: var(--accent); }
+.pt-tip { font-size: 13px; }
+.pt-tip b { color: var(--c); }
+.pt-copy { font-size: 12px; padding: 3px 10px; }
+.pt-ask h3 { margin: 0 0 8px; }
+.pt-ask-form { display: flex; gap: 6px; }
+.pt-ask-form input {
+  flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink);
+  padding: 9px 11px; font: inherit; font-size: 14px;
+}
+.pt-ask-form button { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 0 16px; font: inherit; font-weight: 600; cursor: pointer; }
+.pt-ask-form button:disabled { opacity: 0.6; }
+.pt-answer:empty { display: none; }
+.pt-answer { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 6px; }
+.pt-answer p { margin: 0; }
+.pt-answer blockquote { margin: 0; padding-left: 10px; border-left: 2px solid var(--line); color: var(--muted); font: italic 13px/1.45 Georgia, serif; }
+.pt-answer details { font-size: 13px; color: var(--muted); }
+.pt-q { font-weight: 600; }
+.pt-verdict-chip { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 99px; margin-right: 4px; background: var(--line); color: var(--ink); }
+.pt-v-yes { background: var(--low-bg); color: var(--low); }
+.pt-v-no { background: var(--high-bg); color: var(--high); }
+.pt-v-depends { background: var(--medium-bg); color: var(--medium); }
+/* ?focus=ask (screenshots): show only the verdict and the Ask card. */
+.pt-focus-ask .pt-input, .pt-focus-ask .pt-privacy, .pt-focus-ask .pt-go,
+.pt-focus-ask .pt-result > :not(.pt-summary):not(.pt-ask) { display: none; }

@@ -3,6 +3,8 @@
 import { analyzeDocument, SOURCE_LABEL } from '../core/engine.js';
 import { PRIVACY } from '../core/router.js';
 import { createHybridClient, nanoStatus, isConfigured } from '../firebase/client.js';
+import { CATEGORIES } from '../core/detector.js';
+import { answerQuestion, SUGGESTED_QUESTIONS, VERDICT_TEXT } from '../core/ask.js';
 
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -187,6 +189,7 @@ export async function mountApp(root, host) {
         onProgress: progress,
       });
       renderResult(ref('result'), out, doc.title, Boolean(host.mockModel));
+      mountAsk(ref('result'), { text: doc.text, kind: out.result.kind, runModel, env, simulated: Boolean(host.mockModel) });
       progress('');
     } catch (e) {
       progress('');
@@ -197,7 +200,77 @@ export async function mountApp(root, host) {
     }
   });
 
+  // "Ask the fine print": one question at a time about the document just explained.
+  function mountAsk(el, docCtx) {
+    const box = document.createElement('section');
+    box.className = 'pt-card pt-ask';
+    box.innerHTML = `
+      <h3>Ask the fine print</h3>
+      <form class="pt-ask-form"><input type="text" name="q" placeholder="e.g. Can I cancel any time?" aria-label="Your question" maxlength="200" autocomplete="off"><button type="submit">Ask</button></form>
+      <div class="pt-samples">${SUGGESTED_QUESTIONS.map((q) => `<button type="button" class="pt-chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="pt-answer" aria-live="polite"></div>`;
+    el.appendChild(box);
+    const form = box.querySelector('form');
+    const field = form.querySelector('input');
+    const out = box.querySelector('.pt-answer');
+    let asking = false;
+    const ask = async (q) => {
+      if (asking) return;
+      asking = true;
+      form.querySelector('button').disabled = true;
+      out.innerHTML = '<p class="pt-progress">Finding the relevant passages…</p>';
+      try {
+        const a = await answerQuestion(docCtx.text, q, {
+          settings: { privacy: state.privacy, demo: state.demo },
+          env: docCtx.env,
+          limits: state.limits || undefined,
+          runModel: docCtx.runModel,
+          kind: docCtx.kind,
+        });
+        out.innerHTML = `
+          <p class="pt-q">${esc(q)}</p>
+          <p><span class="pt-verdict-chip pt-v-${esc(a.verdict)}">${esc(VERDICT_TEXT[a.verdict] || a.verdict)}</span> ${esc(a.answer)}</p>
+          ${a.quote ? `<blockquote>“${esc(a.quote)}”</blockquote>` : ''}
+          <div class="pt-where">${a.sources.map((s) => `<span class="pt-src pt-src-${esc(s)}">${esc(SOURCE_LABEL[s] || s)}${docCtx.simulated && s !== 'rules' ? ' \u00b7 simulated' : ''}</span>`).join('')}<span class="pt-ms">${(a.ms / 1000).toFixed(1)} s</span><p>${esc(a.reason)}</p></div>
+          ${a.verdict === 'unclear' && a.passages.length > 1 ? `<details><summary>${a.passages.length} matching passages</summary><ul class="pt-notes">${a.passages.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></details>` : ''}`;
+      } catch (e) {
+        out.innerHTML = `<div class="pt-error">${esc(e.message || e)}</div>`;
+      } finally {
+        asking = false;
+        form.querySelector('button').disabled = false;
+      }
+    };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (field.value.trim()) ask(field.value.trim());
+    });
+    box.querySelectorAll('[data-q]').forEach((b) =>
+      b.addEventListener('click', () => {
+        field.value = b.dataset.q;
+        ask(b.dataset.q);
+      }),
+    );
+  }
+
   return { state, rerender: refreshEnv };
+}
+
+/** Plain-text version of a result, for the Copy button (paste into a chat or note). */
+export function resultToText(out, title) {
+  const { result } = out;
+  const lines = [`Plain Terms: ${title ? `${title} (${result.kind})` : result.kind}`, `${result.scoreLabel} (${result.score}/100). ${result.tldr}`, ''];
+  if (result.points.length) lines.push('In plain terms:', ...result.points.map((p) => `- ${p}`), '');
+  if (result.risks.length) {
+    lines.push('Watch out for:');
+    for (const r of result.risks) {
+      lines.push(`- [${r.severity}] ${r.label}: ${r.why}`, `  "${r.quote}"`);
+      const tip = CATEGORIES[r.category]?.tip;
+      if (tip) lines.push(`  What you can do: ${tip}`);
+    }
+    lines.push('');
+  }
+  lines.push('Explained by Plain Terms (not legal advice): https://plain-terms.web.app');
+  return lines.join('\n');
 }
 
 export function renderResult(el, out, title, simulated = false) {
@@ -216,6 +289,7 @@ export function renderResult(el, out, title, simulated = false) {
     <div class="pt-where">
       ${sources.map((s) => `<span class="pt-src pt-src-${esc(s)}">${esc(SOURCE_LABEL[s] || s)}${simulated && s !== 'rules' ? ' \u00b7 simulated' : ''}</span>`).join('')}
       <span class="pt-ms">${(ms / 1000).toFixed(1)} s</span>
+      <button type="button" class="pt-chip pt-copy" data-ref="copy">Copy summary</button>
       <p>${esc(reason)}</p>
     </div>
     ${result.points.length ? `<h3>In plain terms</h3><ul class="pt-points">${result.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
@@ -229,6 +303,7 @@ export function renderResult(el, out, title, simulated = false) {
         <header><span class="pt-sev">${esc(r.severity)}</span><b>${esc(r.label)}</b></header>
         <p>${esc(r.why)}</p>
         <blockquote>“${esc(r.quote)}”</blockquote>
+        ${CATEGORIES[r.category]?.tip ? `<p class="pt-tip"><b>What you can do:</b> ${esc(CATEGORIES[r.category].tip)}</p>` : ''}
         <small>${esc(originText[r.origin] || '')}</small>
       </article>`,
             )
@@ -237,4 +312,14 @@ export function renderResult(el, out, title, simulated = false) {
     }
     ${notes.length ? `<ul class="pt-notes">${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
   `;
+  const copy = el.querySelector('[data-ref="copy"]');
+  copy?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(resultToText(out, title));
+      copy.textContent = 'Copied';
+    } catch {
+      copy.textContent = 'Copy failed';
+    }
+    setTimeout(() => (copy.textContent = 'Copy summary'), 1600);
+  });
 }
